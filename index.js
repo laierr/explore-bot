@@ -5,7 +5,6 @@ const Promise = require('bluebird'),
   get = Promise.promisify(require('request').get),
   TelegramBot = require('node-telegram-bot-api'),
   qs = require('querystring'),
-  CONFIG = require('./config.json'),
   API_URL = "https://api.foursquare.com/v2/venues/explore?";
 
 const getResults = (options, credentials) => {
@@ -72,6 +71,8 @@ const start = (config) => {
 };
 
 const getConfig = () => {
+  //  CONFIG = require('./config.json')
+
   return {
     "token": process.env.TELEGRAM_TOKEN,
     "foursquare_credentials": {
