@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/mocha test/test_*.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +14,7 @@
     "node-telegram-bot-api": "^0.23.3"
   },
   "devDependencies": {
+    "expect.js": "^0.3.1",
     "mocha": "^3.0.2"
   }
 }

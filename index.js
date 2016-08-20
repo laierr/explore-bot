@@ -21,7 +21,7 @@ const getVenues = (data) => {
 };
 
 const formatAnswer = (venue, index) => {
-  return `/venue${index+1} ${venue.name}, ${venue.location.address}`;
+  return `/venue${index + 1} ${venue.name}, ${venue.location.address}`;
 };
 
 const sendVenueLocation = (bot, config, cache, msg, match) => {
@@ -74,3 +74,5 @@ const start = (config) => {
 if (!module.parent) {
   start(CONFIG);
 }
+
+module.exports.formatAnswer = formatAnswer;
