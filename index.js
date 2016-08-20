@@ -21,10 +21,29 @@ const getVenues = (data) => {
 };
 
 const formatAnswer = (venue, index) => {
-  return `/${index} ${venue.name}, ${venue.location.address}`;
+  return `/venue${index+1} ${venue.name}, ${venue.location.address}`;
 };
 
-const onLocation = (bot, config, msg) => {
+const sendVenueLocation = (bot, config, cache, msg, match) => {
+  const id = msg.chat.id,
+    index = _.toInteger(match[1]),
+    venues = _.get(cache, `${id}.answers`),
+    venue = venues[index - 1];
+
+  Promise.all([
+    bot.sendLocation(id, venue.location.lat,venue.location.lng),
+    bot.sendMessage(id, `${venue.name},
+Phone: ${venue.contact.phone}
+Category: ${venue.categories[0].name}
+${venue.hours.status || ''}
+${venue.location.address} (${venue.location.distance}m)`)
+  ]).then(() => {
+    const formattedAnswers = _.map(venues, formatAnswer);
+    return bot.sendMessage(id, 'Other venues:\n' + formattedAnswers.join('\n'));
+  });
+};
+
+const onLocation = (bot, config, cache, msg) => {
   const id = msg.chat.id,
     ll = msg.location.latitude + ',' + msg.location.longitude,
     limit = 3,
@@ -33,17 +52,22 @@ const onLocation = (bot, config, msg) => {
     options = {limit, ll, section, v};
 
   getResults(options, config.foursquare_credentials)
-    .then(getVenues).map(formatAnswer).then(answers => {
-      bot.sendMessage(id, answers.join('\n'));
+    .then(getVenues).tap(answers => {
+      _.set(cache, `${id}.answers`, answers);
+    }).map(formatAnswer).then(formattedAnswers => {
+      bot.sendMessage(id, formattedAnswers.join('\n'));
     }).catch(err => {
       bot.sendMessage(id, err.toString());
     });
 };
 
 const start = (config) => {
-  const bot = new TelegramBot(config.token, {polling: true});
+  const bot = new TelegramBot(config.token, {polling: true}),
+    cache = {};
 
-  bot.on('location', _.partial(onLocation, bot, config));
+  bot.on('location', _.partial(onLocation, bot, config, cache));
+  bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, cache));
+
   console.log('Up, up and away!');
 };
 
