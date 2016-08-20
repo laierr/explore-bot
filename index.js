@@ -71,8 +71,18 @@ const start = (config) => {
   console.log('Up, up and away!');
 };
 
+const getConfig = () => {
+  return {
+    "token": process.env.TELEGRAM_TOKEN,
+    "foursquare_credentials": {
+      "client_id": process.env.FOURSQUARE_CLIENT_ID,
+      "client_secret": process.env.FOURSQUARE_SECRET
+    }
+  }
+};
+
 if (!module.parent) {
-  start(CONFIG);
+  start(getConfig());
 }
 
 module.exports.formatAnswer = formatAnswer;
