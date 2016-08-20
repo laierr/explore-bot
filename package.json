@@ -1,0 +1,19 @@
+{
+  "name": "explore-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "lodash": "^4.15.0",
+    "node-telegram-bot-api": "^0.23.3"
+  },
+  "devDependencies": {
+    "mocha": "^3.0.2"
+  }
+}

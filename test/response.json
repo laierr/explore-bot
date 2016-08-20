@@ -1,0 +1,349 @@
+{
+    "meta": {
+        "code": 200,
+        "requestId": "57b873a0498ec6204086355b"
+    },
+    "notifications": [{
+        "type": "notificationTray",
+        "item": {
+            "unreadCount": 6
+        }
+    }],
+    "response": {
+        "suggestedFilters": {
+            "header": "Tap to show:",
+            "filters": [{
+                "name": "I haven't been",
+                "key": "novelty"
+            }, {
+                "name": "Open now",
+                "key": "openNow"
+            }]
+        },
+        "warning": {
+            "text": "There aren't a lot of results near you. Try something more general, reset your filters, or expand the search area."
+        },
+        "suggestedRadius": 961,
+        "headerLocation": "Lev HaIr",
+        "headerFullLocation": "Lev HaIr, Tel Aviv",
+        "headerLocationGranularity": "neighborhood",
+        "query": "food",
+        "totalResults": 132,
+        "suggestedBounds": {
+            "ne": {
+                "lat": 32.064950568147346,
+                "lng": 34.773789385214684
+            },
+            "sw": {
+                "lat": 32.0622509083619,
+                "lng": 34.770404185972666
+            }
+        },
+        "groups": [{
+            "type": "Recommended Places",
+            "name": "recommended",
+            "items": [{
+                "reasons": {
+                    "count": 0,
+                    "items": [{
+                        "summary": "This spot is popular",
+                        "type": "general",
+                        "reasonName": "globalInteractionReason"
+                    }]
+                },
+                "venue": {
+                    "id": "4fcd43fce4b06137d5440bb4",
+                    "name": "Port Said (פורט סעיד)",
+                    "contact": {
+                        "phone": "036207436",
+                        "formattedPhone": "03-620-7436"
+                    },
+                    "location": {
+                        "address": "Har Sinai 1-5",
+                        "lat": 32.0646327239592,
+                        "lng": 34.77215612976618,
+                        "labeledLatLngs": [{
+                            "label": "display",
+                            "lat": 32.0646327239592,
+                            "lng": 34.77215612976618
+                        }],
+                        "distance": 139,
+                        "cc": "IL",
+                        "city": "Tel Aviv",
+                        "state": "Tel Aviv",
+                        "country": "Israel",
+                        "formattedAddress": ["Har Sinai 1-5", "Tel Aviv"]
+                    },
+                    "categories": [{
+                        "id": "4bf58dd8d48988d155941735",
+                        "name": "Gastropub",
+                        "pluralName": "Gastropubs",
+                        "shortName": "Gastropub",
+                        "icon": {
+                            "prefix": "https:\/\/ss3.4sqi.net\/img\/categories_v2\/food\/gastropub_",
+                            "suffix": ".png"
+                        },
+                        "primary": true
+                    }],
+                    "verified": false,
+                    "stats": {
+                        "checkinsCount": 2363,
+                        "usersCount": 1237,
+                        "tipCount": 85
+                    },
+                    "price": {
+                        "tier": 2,
+                        "message": "Moderate",
+                        "currency": "$"
+                    },
+                    "rating": 9.0,
+                    "ratingColor": "00B551",
+                    "ratingSignals": 347,
+                    "allowMenuUrlEdit": true,
+                    "hours": {
+                        "status": "Open until 4:00 AM",
+                        "isOpen": true,
+                        "isLocalHoliday": false
+                    },
+                    "photos": {
+                        "count": 0,
+                        "groups": []
+                    },
+                    "hereNow": {
+                        "count": 0,
+                        "summary": "Nobody here",
+                        "groups": []
+                    }
+                },
+                "tips": [{
+                    "id": "5249ad5d11d2516dc8ac1828",
+                    "createdAt": 1380560221,
+                    "text": "For dinner, head to this trendy restaurant and bar behind the Great Synagogue and try the steak with tahini and tomato tartare.",
+                    "type": "user",
+                    "canonicalUrl": "https:\/\/foursquare.com\/item\/5249ad5d11d2516dc8ac1828",
+                    "likes": {
+                        "count": 9,
+                        "groups": [],
+                        "summary": "9 likes"
+                    },
+                    "logView": true,
+                    "agreeCount": 9,
+                    "disagreeCount": 0,
+                    "todo": {
+                        "count": 3
+                    },
+                    "user": {
+                        "id": "5339676",
+                        "firstName": "Travel + Leisure",
+                        "gender": "none",
+                        "photo": {
+                            "prefix": "https:\/\/irs0.4sqi.net\/img\/user\/",
+                            "suffix": "\/3MAPUHGXHTC3MWHJ.jpg"
+                        },
+                        "type": "page"
+                    }
+                }],
+                "referralId": "e-3-4fcd43fce4b06137d5440bb4-0"
+            }, {
+                "reasons": {
+                    "count": 0,
+                    "items": [{
+                        "summary": "This spot is popular",
+                        "type": "general",
+                        "reasonName": "globalInteractionReason"
+                    }]
+                },
+                "venue": {
+                    "id": "51f19613498e340710dcad0a",
+                    "name": "Night Kitchen",
+                    "contact": {
+                        "phone": "035660481",
+                        "formattedPhone": "03-566-0481"
+                    },
+                    "location": {
+                        "address": "Lilienblum 43",
+                        "crossStreet": "Allenby",
+                        "lat": 32.062568752550035,
+                        "lng": 34.77289518477834,
+                        "labeledLatLngs": [{
+                            "label": "display",
+                            "lat": 32.062568752550035,
+                            "lng": 34.77289518477834
+                        }],
+                        "distance": 105,
+                        "postalCode": "6513452",
+                        "cc": "IL",
+                        "city": "Tel Aviv",
+                        "state": "Tel Aviv",
+                        "country": "Israel",
+                        "formattedAddress": ["Lilienblum 43 (Allenby)", "Tel Aviv 6513452"]
+                    },
+                    "categories": [{
+                        "id": "4bf58dd8d48988d1c4941735",
+                        "name": "Restaurant",
+                        "pluralName": "Restaurants",
+                        "shortName": "Restaurant",
+                        "icon": {
+                            "prefix": "https:\/\/ss3.4sqi.net\/img\/categories_v2\/food\/default_",
+                            "suffix": ".png"
+                        },
+                        "primary": true
+                    }],
+                    "verified": false,
+                    "stats": {
+                        "checkinsCount": 161,
+                        "usersCount": 140,
+                        "tipCount": 19
+                    },
+                    "url": "http:\/\/www.nightkitchen.co.il",
+                    "price": {
+                        "tier": 2,
+                        "message": "Moderate",
+                        "currency": "$"
+                    },
+                    "rating": 8.8,
+                    "ratingColor": "73CF42",
+                    "ratingSignals": 48,
+                    "allowMenuUrlEdit": true,
+                    "photos": {
+                        "count": 0,
+                        "groups": []
+                    },
+                    "hereNow": {
+                        "count": 0,
+                        "summary": "Nobody here",
+                        "groups": []
+                    }
+                },
+                "tips": [{
+                    "id": "54394935498e5a66c79e242e",
+                    "createdAt": 1413040437,
+                    "text": "\"Meh\" dishes dressed up as fancy. Amateur at best. When ordering a steak, they said the meat comes as it comes. No rare, med or well done. But when it came the steaks were cooked to different degrees",
+                    "type": "user",
+                    "canonicalUrl": "https:\/\/foursquare.com\/item\/54394935498e5a66c79e242e",
+                    "likes": {
+                        "count": 3,
+                        "groups": [],
+                        "summary": "3 likes"
+                    },
+                    "logView": true,
+                    "agreeCount": 3,
+                    "disagreeCount": 0,
+                    "todo": {
+                        "count": 0
+                    },
+                    "user": {
+                        "id": "31508007",
+                        "firstName": "Avihu",
+                        "gender": "male",
+                        "photo": {
+                            "prefix": "https:\/\/irs1.4sqi.net\/img\/user\/",
+                            "suffix": "\/HG3YFDL2LFS2T1F5.jpg"
+                        }
+                    }
+                }],
+                "referralId": "e-3-51f19613498e340710dcad0a-1"
+            }, {
+                "reasons": {
+                    "count": 0,
+                    "items": [{
+                        "summary": "This spot is popular",
+                        "type": "general",
+                        "reasonName": "globalInteractionReason"
+                    }]
+                },
+                "venue": {
+                    "id": "4fd9c77be4b00cc4285a93d1",
+                    "name": "Sandwich (סנדוויץ)",
+                    "contact": {
+                        "phone": "035498082",
+                        "formattedPhone": "03-549-8082"
+                    },
+                    "location": {
+                        "address": "59 Nahalat Binyamin St",
+                        "lat": 32.06380985297891,
+                        "lng": 34.771298386409,
+                        "labeledLatLngs": [{
+                            "label": "display",
+                            "lat": 32.06380985297891,
+                            "lng": 34.771298386409
+                        }],
+                        "distance": 147,
+                        "cc": "IL",
+                        "country": "Israel",
+                        "formattedAddress": ["59 Nahalat Binyamin St"]
+                    },
+                    "categories": [{
+                        "id": "4bf58dd8d48988d1c5941735",
+                        "name": "Sandwich Place",
+                        "pluralName": "Sandwich Places",
+                        "shortName": "Sandwiches",
+                        "icon": {
+                            "prefix": "https:\/\/ss3.4sqi.net\/img\/categories_v2\/food\/deli_",
+                            "suffix": ".png"
+                        },
+                        "primary": true
+                    }],
+                    "verified": false,
+                    "stats": {
+                        "checkinsCount": 293,
+                        "usersCount": 145,
+                        "tipCount": 9
+                    },
+                    "url": "http:\/\/www.sandwich59.co.il",
+                    "price": {
+                        "tier": 1,
+                        "message": "Cheap",
+                        "currency": "$"
+                    },
+                    "rating": 8.7,
+                    "ratingColor": "73CF42",
+                    "ratingSignals": 26,
+                    "allowMenuUrlEdit": true,
+                    "hours": {
+                        "status": "Open until 11:00 PM",
+                        "isOpen": true,
+                        "isLocalHoliday": false
+                    },
+                    "photos": {
+                        "count": 0,
+                        "groups": []
+                    },
+                    "hereNow": {
+                        "count": 0,
+                        "summary": "Nobody here",
+                        "groups": []
+                    }
+                },
+                "tips": [{
+                    "id": "55ccd547498e9c3319314924",
+                    "createdAt": 1439487303,
+                    "text": "Super tasty sandwiches!! The turkey meatball one is great, and you get a nice sturdy bag if you order take-out!",
+                    "type": "user",
+                    "canonicalUrl": "https:\/\/foursquare.com\/item\/55ccd547498e9c3319314924",
+                    "likes": {
+                        "count": 1,
+                        "groups": [],
+                        "summary": "1 like"
+                    },
+                    "logView": true,
+                    "agreeCount": 1,
+                    "disagreeCount": 0,
+                    "todo": {
+                        "count": 0
+                    },
+                    "user": {
+                        "id": "13911278",
+                        "firstName": "tim",
+                        "gender": "male",
+                        "photo": {
+                            "prefix": "https:\/\/irs0.4sqi.net\/img\/user\/",
+                            "suffix": "\/13911278-523ZURC4G0PKUKEM.jpg"
+                        }
+                    }
+                }],
+                "referralId": "e-3-4fd9c77be4b00cc4285a93d1-2"
+            }]
+        }]
+    }
+}
