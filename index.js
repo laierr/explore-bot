@@ -61,6 +61,8 @@ const onLocation = (bot, config, cache, msg) => {
 };
 
 const start = (config) => {
+  console.log(config);
+
   const bot = new TelegramBot(config.token, {polling: true}),
     cache = {};
 
