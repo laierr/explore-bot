@@ -20,21 +20,23 @@ const getVenues = (data) => {
 };
 
 const formatAnswer = (venue, index) => {
-  return `/venue${index + 1} ${venue.name}, ${venue.location.address}`;
+  return `/venue${index + 1} ${venue.name}, ${venue.location.address || 'exact address unspecified'}`;
 };
 
 const sendVenueLocation = (bot, config, cache, msg, match) => {
   const id = msg.chat.id,
     index = _.toInteger(match[1]),
     venues = _.get(cache, `${id}.answers`),
-    venue = venues[index - 1];
+    venue = venues[index - 1],
+    openHours = _.get(venue, `hours.status`, `no info`),
+    category = _.get(venue, 'categories[0].name', 'no category');
   Promise.all([
     bot.sendLocation(id, venue.location.lat,venue.location.lng),
     bot.sendMessage(id, `${venue.name},
-Phone: ${venue.contact.phone}
-Category: ${venue.categories[0].name}
-${venue.hours.status || ''}
-${venue.location.address} (${venue.location.distance}m)`)
+Phone: ${venue.contact.phone || 'no phone'}
+Category: ${category}
+Open hours: ${openHours}
+${venue.location.address || 'No address'} (${venue.location.distance}m)`)
   ]).then(() => {
     const formattedAnswers = _.map(venues, formatAnswer);
     return bot.sendMessage(id, 'Other venues:\n' + formattedAnswers.join('\n'));
