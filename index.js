@@ -28,7 +28,6 @@ const sendVenueLocation = (bot, config, cache, msg, match) => {
     index = _.toInteger(match[1]),
     venues = _.get(cache, `${id}.answers`),
     venue = venues[index - 1];
-
   Promise.all([
     bot.sendLocation(id, venue.location.lat,venue.location.lng),
     bot.sendMessage(id, `${venue.name},
@@ -61,7 +60,7 @@ const onLocation = (bot, config, cache, msg) => {
 };
 
 const start = (config) => {
-  console.log(config);
+  //console.log(config);
 
   const bot = new TelegramBot(config.token, {polling: true}),
     cache = {};
@@ -73,13 +72,15 @@ const start = (config) => {
 };
 
 const getConfig = () => {
-  //  CONFIG = require('./config.json')
-
-  return {
-    "token": process.env.TELEGRAM_TOKEN,
-    "foursquare_credentials": {
-      "client_id": process.env.FOURSQUARE_CLIENT_ID,
-      "client_secret": process.env.FOURSQUARE_SECRET
+  if (require('./config.json')) {
+    return require('./config.json');
+  } else {
+    return {
+      "token": process.env.TELEGRAM_TOKEN,
+      "foursquare_credentials": {
+        "client_id": process.env.FOURSQUARE_CLIENT_ID,
+        "client_secret": process.env.FOURSQUARE_SECRET
+      }
     }
   }
 };
