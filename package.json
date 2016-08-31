@@ -7,7 +7,7 @@
     "start": "node index.js",
     "test": "./node_modules/.bin/mocha test/test_*.js"
   },
-  "author": "",
+  "author": "Lev Khomak",
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.4.1",

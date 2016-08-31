@@ -96,9 +96,9 @@ const start = (config) => {
 };
 
 const getConfig = () => {
-  if (require('./config.json')) {
-    return require('./config.json');
-  } else {
+  try {
+    return require('./config.json')
+  } catch (e) {
     return {
       "token": process.env.TELEGRAM_TOKEN,
       "foursquare_credentials": {
