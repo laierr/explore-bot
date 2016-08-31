@@ -6,7 +6,6 @@ const Promise = require('bluebird'),
   TelegramBot = require('node-telegram-bot-api'),
   qs = require('querystring'),
   Redis = require('ioredis'),
-  redis = new Redis(),
   API_URL = "https://api.foursquare.com/v2/venues/explore?";
 
 const getResults = (options, credentials) => {
@@ -79,7 +78,6 @@ const onLocation = (bot, config, redis, msg) => {
 
   getResults(options, config.foursquare_credentials)
     .then(getVenues).tap(answers => {
-      //_.set(cache, `${id}.answers`, answers);
       redis.hmset(id, {answers: JSON.stringify(answers)});
     }).map(formatAnswer).then(formattedAnswers => {
       bot.sendMessage(id, formattedAnswers.join('\n'));
@@ -89,9 +87,8 @@ const onLocation = (bot, config, redis, msg) => {
 };
 
 const start = (config) => {
-
-  const bot = new TelegramBot(config.token, {polling: true});
-    //cache = {};
+  const bot = new TelegramBot(config.token, {polling: true}),
+    redis = new Redis(config.redis_url);
 
   bot.on('location', _.partial(onLocation, bot, config, redis));
   bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, redis));
@@ -107,7 +104,8 @@ const getConfig = () => {
       "foursquare_credentials": {
         "client_id": process.env.FOURSQUARE_CLIENT_ID,
         "client_secret": process.env.FOURSQUARE_SECRET
-      }
+      },
+      "redis_url": process.env.REDIS_URL
     }
   }
 };
