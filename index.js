@@ -5,6 +5,8 @@ const Promise = require('bluebird'),
   get = Promise.promisify(require('request').get),
   TelegramBot = require('node-telegram-bot-api'),
   qs = require('querystring'),
+  Redis = require('ioredis'),
+  redis = new Redis(),
   API_URL = "https://api.foursquare.com/v2/venues/explore?";
 
 const getResults = (options, credentials) => {
@@ -20,30 +22,54 @@ const getVenues = (data) => {
 };
 
 const formatAnswer = (venue, index) => {
-  return `/venue${index + 1} ${venue.name}, ${venue.location.address || 'exact address unspecified'}`;
+  const address = _.get(venue, 'location.address', 'Exact address unspecified');
+  return `/venue${index + 1} ${venue.name}, ${address}`;
 };
 
-const sendVenueLocation = (bot, config, cache, msg, match) => {
+const getFromRedis = (redis, id, field) => {
+  return new Promise((resolve, reject) => {
+    redis.hgetall(id, (error, data) => {
+      if (error) {
+        return reject;
+      }
+      try {
+        resolve(JSON.parse(data[field]));
+      } catch (e) {
+        reject(e);
+      }
+    });
+  });
+};
+
+const sendVenueLocation = (bot, config, redis, msg, match) => {
   const id = msg.chat.id,
     index = _.toInteger(match[1]),
-    venues = _.get(cache, `${id}.answers`),
-    venue = venues[index - 1],
+    venues = getFromRedis(redis, id.toString(), 'answers');
+
+  venues.then(venues => {
+    const venue = venues[index - 1],
     openHours = _.get(venue, `hours.status`, `no info`),
-    category = _.get(venue, 'categories[0].name', 'no category');
-  Promise.all([
-    bot.sendLocation(id, venue.location.lat,venue.location.lng),
-    bot.sendMessage(id, `${venue.name},
-Phone: ${venue.contact.phone || 'no phone'}
+    phone = _.get(venue, 'contact.phone', 'no phone'),
+    category = _.get(venue, 'categories[0].name', 'no category'),
+    address = _.get(venue, 'location.address', 'No address'),
+    distance = _.get(venue, 'location.distance', '000');
+
+    return Promise.all([
+      bot.sendLocation(id, venue.location.lat,venue.location.lng),
+      bot.sendMessage(id,
+`${venue.name},
+Phone: ${phone}
 Category: ${category}
 Open hours: ${openHours}
-${venue.location.address || 'No address'} (${venue.location.distance}m)`)
-  ]).then(() => {
+${address} (${distance}m)`)
+    ]).return(venues);
+  }).then((venues) => {
     const formattedAnswers = _.map(venues, formatAnswer);
     return bot.sendMessage(id, 'Other venues:\n' + formattedAnswers.join('\n'));
   });
 };
 
-const onLocation = (bot, config, cache, msg) => {
+const onLocation = (bot, config, redis, msg) => {
   const id = msg.chat.id,
     ll = msg.location.latitude + ',' + msg.location.longitude,
     limit = 3,
@@ -53,7 +79,8 @@ const onLocation = (bot, config, cache, msg) => {
 
   getResults(options, config.foursquare_credentials)
     .then(getVenues).tap(answers => {
-      _.set(cache, `${id}.answers`, answers);
+      //_.set(cache, `${id}.answers`, answers);
+      redis.hmset(id, {answers: JSON.stringify(answers)});
     }).map(formatAnswer).then(formattedAnswers => {
       bot.sendMessage(id, formattedAnswers.join('\n'));
     }).catch(err => {
@@ -62,14 +89,12 @@ const onLocation = (bot, config, cache, msg) => {
 };
 
 const start = (config) => {
-  //console.log(config);
 
-  const bot = new TelegramBot(config.token, {polling: true}),
-    cache = {};
+  const bot = new TelegramBot(config.token, {polling: true});
+    //cache = {};
 
-  bot.on('location', _.partial(onLocation, bot, config, cache));
-  bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, cache));
-
+  bot.on('location', _.partial(onLocation, bot, config, redis));
+  bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, redis));
   console.log('Up, up and away!');
 };
 
@@ -86,6 +111,7 @@ const getConfig = () => {
     }
   }
 };
+
 
 if (!module.parent) {
   start(getConfig());
