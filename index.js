@@ -2,7 +2,9 @@
 
 const Promise = require('bluebird'),
   _ = require('lodash'),
-  get = Promise.promisify(require('request').get),
+  fs = require('fs'),
+  request = require('request'),
+  get = Promise.promisify(request.get),
   TelegramBot = require('node-telegram-bot-api'),
   qs = require('querystring'),
   Redis = require('ioredis'),
@@ -13,11 +15,8 @@ const getResults = (options, credentials) => {
   return get(url).get('body').then(JSON.parse);
 };
 
-const getVenues = (data) => {
-  const items = _.get(data, 'response.groups[0].items'),
-    venues = _.map(items, 'venue');
-
-  return venues;
+const getAnswers = (data) => {
+  return _.get(data, 'response.groups[0].items');
 };
 
 const formatAnswer = (venue, index) => {
@@ -40,13 +39,20 @@ const getFromRedis = (redis, id, field) => {
   });
 };
 
+const sendVenueList = (bot, id, venues) => {
+  const formattedAnswers = _.map(venues, formatAnswer);
+  return bot.sendMessage(id, 'Other venues:\n' + formattedAnswers.join('\n'));
+};
+
 const sendVenueLocation = (bot, config, redis, msg, match) => {
   const id = msg.chat.id,
     index = _.toInteger(match[1]),
-    venues = getFromRedis(redis, id.toString(), 'answers');
+    answers = getFromRedis(redis, id.toString(), 'answers');
 
-  venues.then(venues => {
-    const venue = venues[index - 1],
+  answers.then(answers => {
+    const venues = _.map(answers, 'venue'),
+    venue = venues[index - 1],
+    tips = answers[index - 1].tips,
     openHours = _.get(venue, `hours.status`, `no info`),
     phone = _.get(venue, 'contact.phone', 'no phone'),
     category = _.get(venue, 'categories[0].name', 'no category'),
@@ -60,12 +66,43 @@ const sendVenueLocation = (bot, config, redis, msg, match) => {
 Phone: ${phone}
 Category: ${category}
 Open hours: ${openHours}
-${address} (${distance}m)`)
+${address} (${distance}m)
+More: /tips${index}`)
     ]).return(venues);
-  }).then((venues) => {
-    const formattedAnswers = _.map(venues, formatAnswer);
-    return bot.sendMessage(id, 'Other venues:\n' + formattedAnswers.join('\n'));
-  });
+  }).then(_.partial(sendVenueList, bot, id));
+};
+
+const getPhoto = (url) => {
+    return new Promise((resolve, reject) => {
+        request(url).pipe((stream, err) => {
+            err ? reject(err) : resolve(stream);
+        });
+    });
+};
+
+const sendVenueTips = (bot, config, redis, msg, match) => {
+  const id = msg.chat.id,
+    index = _.toInteger(match[1]),
+    answers = getFromRedis(redis, id.toString(), 'answers'),
+    venues = answers.map(a => a.venue);
+
+    return answers.get(index - 1).get('tips').map(tip => {
+        const data = [tip.text];
+
+        if (tip.photourl) {
+            data.push(get({url: tip.photourl, encoding: null}).get('body'));
+        }
+
+        return Promise.all(data);
+    }).map((results) => {
+        const [text, photo] = results;
+
+        if (photo) {
+            return bot.sendPhoto(id, photo, {caption: text});
+        } else {
+            return bot.sendMessage(id, text);
+        }
+    }).return(venues).then(_.partial(sendVenueList, bot, id));
 };
 
 const onLocation = (bot, config, redis, msg) => {
@@ -77,16 +114,16 @@ const onLocation = (bot, config, redis, msg) => {
     options = {limit, ll, section, v};
 
   getResults(options, config.foursquare_credentials)
-    .then(getVenues).tap(answers => {
+    .then(getAnswers).tap(answers => {
       redis.hmset(`users:${id}`, {answers: JSON.stringify(answers)});
-    }).map(formatAnswer).then(formattedAnswers => {
+    }).map((a, i) => formatAnswer(a.venue, i)).then(formattedAnswers => {
       bot.sendMessage(id, formattedAnswers.join('\n'));
     }).catch(err => {
       bot.sendMessage(id, err.toString());
     });
 };
-const processMessages = (bot, config, redis) => {
 
+const processMessages = (bot, config, redis) => {
   redis.lpop('messages').then(JSON.parse).then((msg) =>{
     const next = _.partial(processMessages, bot, config, redis);
 
@@ -96,10 +133,14 @@ const processMessages = (bot, config, redis) => {
         onLocation(bot, config, redis, msg);
       } else if (msg.text) {
         let match;
+
         if (match = msg.text.match(/\/venue(\d+)/)){
-          console.log(match);
           sendVenueLocation(bot, config, redis, msg, match);
+      } else if (match = msg.text.match(/\/tips(\d+)/)){
+          sendVenueTips(bot, config, redis, msg, match);
         }
+
+        console.log(match);
       }
 
       next();
@@ -118,7 +159,6 @@ const start = (config, isWorker) => {
     processMessages(bot, config, redis);
   } else {
     bot.on('message', msg => {redis.lpush(`messages`, JSON.stringify(msg))})
-    //bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, redis));
   }
 
   console.log('Up, up and away!');
