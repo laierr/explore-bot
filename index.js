@@ -27,7 +27,7 @@ const formatAnswer = (venue, index) => {
 
 const getFromRedis = (redis, id, field) => {
   return new Promise((resolve, reject) => {
-    redis.hgetall(id, (error, data) => {
+    redis.hgetall(`users:${id}`, (error, data) => {
       if (error) {
         return reject;
       }
@@ -78,27 +78,51 @@ const onLocation = (bot, config, redis, msg) => {
 
   getResults(options, config.foursquare_credentials)
     .then(getVenues).tap(answers => {
-      redis.hmset(id, {answers: JSON.stringify(answers)});
+      redis.hmset(`users:${id}`, {answers: JSON.stringify(answers)});
     }).map(formatAnswer).then(formattedAnswers => {
       bot.sendMessage(id, formattedAnswers.join('\n'));
     }).catch(err => {
       bot.sendMessage(id, err.toString());
     });
 };
+const processMessages = (bot, config, redis) => {
 
-const start = (config) => {
-  const bot = new TelegramBot(config.token, {polling: true}),
+  redis.lpop('messages').then(JSON.parse).then((msg) =>{
+    const next = _.partial(processMessages, bot, config, redis);
+
+    if (!_.isEmpty(msg)) {
+      console.log(msg);
+      if (msg.location) {
+        onLocation(bot, config, redis, msg);
+      }
+      next();
+    } else {
+      setTimeout(next, 200);
+    }
+    });
+};
+
+const start = (config, isWorker) => {
+  const bot = new TelegramBot(config.token, {polling: !isWorker}),
     redis = new Redis(config.redis_url);
 
-  bot.on('location', _.partial(onLocation, bot, config, redis));
-  bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, redis));
+    console.log("Polling: " + !isWorker);
+  if (isWorker) {
+    processMessages(bot, config, redis);
+  } else {
+    bot.on('message', msg => {redis.lpush(`messages`, JSON.stringify(msg))})
+    bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, redis));
+  }
+
   console.log('Up, up and away!');
 };
 
 const getConfig = () => {
   try {
+    console.log('Trying TEST config')
     return require('./config.json')
   } catch (e) {
+    console.log('Failed. We\'re going LIVE!');
     return {
       "token": process.env.TELEGRAM_TOKEN,
       "foursquare_credentials": {
@@ -112,7 +136,7 @@ const getConfig = () => {
 
 
 if (!module.parent) {
-  start(getConfig());
+  start(getConfig(), !_.isEmpty(process.env.WORKER));
 }
 
 module.exports.formatAnswer = formatAnswer;
