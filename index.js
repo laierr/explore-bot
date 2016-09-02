@@ -94,7 +94,14 @@ const processMessages = (bot, config, redis) => {
       console.log(msg);
       if (msg.location) {
         onLocation(bot, config, redis, msg);
+      } else if (msg.text) {
+        let match;
+        if (match = msg.text.match(/\/venue(\d+)/)){
+          console.log(match);
+          sendVenueLocation(bot, config, redis, msg, match);
+        }
       }
+
       next();
     } else {
       setTimeout(next, 200);
@@ -111,7 +118,7 @@ const start = (config, isWorker) => {
     processMessages(bot, config, redis);
   } else {
     bot.on('message', msg => {redis.lpush(`messages`, JSON.stringify(msg))})
-    bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, redis));
+    //bot.onText(/\/venue(\d+)/, _.partial(sendVenueLocation, bot, config, redis));
   }
 
   console.log('Up, up and away!');
