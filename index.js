@@ -128,7 +128,6 @@ const processMessages = (bot, config, redis) => {
     const next = _.partial(processMessages, bot, config, redis);
 
     if (!_.isEmpty(msg)) {
-      console.log(msg);
       if (msg.location) {
         onLocation(bot, config, redis, msg);
       } else if (msg.text) {
@@ -139,8 +138,6 @@ const processMessages = (bot, config, redis) => {
       } else if (match = msg.text.match(/\/tips(\d+)/)){
           sendVenueTips(bot, config, redis, msg, match);
         }
-
-        console.log(match);
       }
 
       next();
