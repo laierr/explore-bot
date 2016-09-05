@@ -44,7 +44,16 @@ const sendVenueList = (bot, id, venues) => {
   const formattedAnswers = _.map(venues, formatAnswer);
   return bot.sendMessage(id, 'Other venues:\n' + formattedAnswers.join('\n'));
 };
-
+const getVenueDetails = (venue) => {
+  const name = venue.name,
+  location = {latitude: venue.location.lat, longitude: venue.location.lng},
+  openHours = _.get(venue, `hours.status`, `no info`),
+  phone = _.get(venue, 'contact.phone', 'no phone'),
+  category = _.get(venue, 'categories[0].name', 'no category'),
+  address = _.get(venue, 'location.address', 'No address'),
+  distance = _.get(venue, 'location.distance', '000');
+  return { name, location, openHours, phone, category, address, distance };
+};
 const sendVenueLocation = (bot, config, redis, msg, match) => {
   const id = msg.chat.id,
     index = _.toInteger(match[1]),
@@ -54,20 +63,16 @@ const sendVenueLocation = (bot, config, redis, msg, match) => {
     const venues = _.map(answers, 'venue'),
     venue = venues[index - 1],
     tips = answers[index - 1].tips,
-    openHours = _.get(venue, `hours.status`, `no info`),
-    phone = _.get(venue, 'contact.phone', 'no phone'),
-    category = _.get(venue, 'categories[0].name', 'no category'),
-    address = _.get(venue, 'location.address', 'No address'),
-    distance = _.get(venue, 'location.distance', '000');
+    details = getVenueDetails(venue);
 
     return Promise.all([
-      bot.sendLocation(id, venue.location.lat,venue.location.lng),
+      bot.sendLocation(id, details.location.latitude, details.location.longitude),
       bot.sendMessage(id,
-`${venue.name},
-Phone: ${phone}
-Category: ${category}
-Open hours: ${openHours}
-${address} (${distance}m)
+`${details.name},
+Phone: ${details.phone}
+Category: ${details.category}
+Open hours: ${details.openHours}
+${details.address} (${details.distance}m)
 More: /tips${index}`)
     ]).return(venues);
   }).then(_.partial(sendVenueList, bot, id));
@@ -105,6 +110,7 @@ const sendVenueTips = (bot, config, redis, msg, match) => {
         }
     }).return(venues).then(_.partial(sendVenueList, bot, id));
 };
+
 const queryAPI  = (config, redis, location) => {
   const ll = location.latitude + ',' + location.longitude,
   limit = 3,
@@ -153,10 +159,14 @@ const processMessages = (bot, config, redis) => {
 };
 
 const webInterface = (config, redis, app) => {
-  app.get('/', (req, res) => {
-    const location = {latitude: 32.0878712, longitude: 34.7270341};
-    queryAPI(config, redis, location).then(results => res.send(results));
+  app.get('/api/v1', (req, res) => {
+    const location = req.query.location || {latitude: 32.0878712, longitude: 34.7270341};
+
+    queryAPI(config, redis, location).map(answer =>{
+      return getVenueDetails(answer.venue);
+    }).then(results => res.send(results));
   });
+
 }
 
 const start = (config, isWorker, isWeb) => {
