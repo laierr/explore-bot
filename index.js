@@ -8,6 +8,7 @@ const Promise = require('bluebird'),
   TelegramBot = require('node-telegram-bot-api'),
   qs = require('querystring'),
   Redis = require('ioredis'),
+  express = require('express'),
   API_URL = "https://api.foursquare.com/v2/venues/explore?";
 
 const getResults = (options, credentials) => {
@@ -104,19 +105,23 @@ const sendVenueTips = (bot, config, redis, msg, match) => {
         }
     }).return(venues).then(_.partial(sendVenueList, bot, id));
 };
+const queryAPI  = (config, redis, location) => {
+  const ll = location.latitude + ',' + location.longitude,
+  limit = 3,
+  v = 20160820,
+  section = "food",
+  options = {limit, ll, section, v};
+
+  return getResults(options, config.foursquare_credentials)
+    .then(getAnswers);
+};
 
 const onLocation = (bot, config, redis, msg) => {
-  const id = msg.chat.id,
-    ll = msg.location.latitude + ',' + msg.location.longitude,
-    limit = 3,
-    v = 20160820,
-    section = "food",
-    options = {limit, ll, section, v};
+  const id = msg.chat.id;
 
-  getResults(options, config.foursquare_credentials)
-    .then(getAnswers).tap(answers => {
-      redis.hmset(`users:${id}`, {answers: JSON.stringify(answers)});
-    }).map((a, i) => formatAnswer(a.venue, i)).then(formattedAnswers => {
+  queryAPI(config, redis, msg.location).tap(answers => {
+    redis.hmset(`users:${id}`, {answers: JSON.stringify(answers)});
+  }).map((a, i) => formatAnswer(a.venue, i)).then(formattedAnswers => {
       bot.sendMessage(id, formattedAnswers.join('\n'));
     }).catch(err => {
       bot.sendMessage(id, err.toString());
@@ -147,18 +152,35 @@ const processMessages = (bot, config, redis) => {
     });
 };
 
-const start = (config, isWorker) => {
-  const bot = new TelegramBot(config.token, {polling: !isWorker}),
-    redis = new Redis(config.redis_url);
+const webInterface = (config, redis, app) => {
+  app.get('/', (req, res) => {
+    const location = {latitude: 32.0878712, longitude: 34.7270341};
+    queryAPI(config, redis, location).then(results => res.send(results));
+  });
+}
 
-    console.log("Polling: " + !isWorker);
-  if (isWorker) {
-    processMessages(bot, config, redis);
+const start = (config, isWorker, isWeb) => {
+  const redis = new Redis(config.redis_url);
+
+  if (isWeb) {
+    console.log('Launching WEB interface');
+    const app = express();
+    webInterface(config, redis, app);
+    app.listen(8000);
   } else {
-    bot.on('message', msg => {redis.lpush(`messages`, JSON.stringify(msg))})
+    const bot = new TelegramBot(config.token, {polling: !isWorker});
+
+      console.log("Launching BOT.\nPolling: " + !isWorker);
+
+    if (isWorker) {
+      processMessages(bot, config, redis);
+    } else {
+      bot.on('message', msg => {redis.lpush(`messages`, JSON.stringify(msg))})
+    }
+
+    console.log('Up, up and away!');
   }
 
-  console.log('Up, up and away!');
 };
 
 const getConfig = () => {
@@ -180,7 +202,7 @@ const getConfig = () => {
 
 
 if (!module.parent) {
-  start(getConfig(), !_.isEmpty(process.env.WORKER));
+  start(getConfig(), !_.isEmpty(process.env.WORKER), !_.isEmpty(process.env.WEB));
 }
 
 module.exports.formatAnswer = formatAnswer;
