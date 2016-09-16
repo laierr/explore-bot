@@ -49,7 +49,7 @@
 
         Promise.all([map, position.then(getResults)]).then(([mymap, data]) => {
             data.map(key => {
-                L.marker([key.location.latitude, key.location.longitude]).bindPopup('Name: ' + key.name + '\nAddress: ' + key.address).addTo(mymap);
+                L.marker([key.location.latitude, key.location.longitude]).bindPopup('Name: ' + key.name + '<br/>Address: ' + key.address).addTo(mymap);
             });
         })
     </script>
