@@ -19,28 +19,39 @@
     <div id="mapid"></div>
 
     <script>
-        const mymap = L.map('mapid').setView([32.0853, 34.7818], 13);
-
-        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-            maxZoom: 18,
-            id: 'mapbox.streets',
-            accessToken: '<%= map_token %>'
-        }).addTo(mymap);
-        const results = new Promise((resolve, reject) => {
-            const reqListener = function() {
-                resolve(JSON.parse(this.responseText));
-            };
-
-            var oReq = new XMLHttpRequest();
-            oReq.addEventListener("load", reqListener);
-            oReq.open("GET", "/api/v1");
-            oReq.send();
+        const position = new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve);
         });
-        results.then(data => {
-                data.map(key => {
-                    L.marker([key.location.latitude, key.location.longitude]).bindPopup('Name: ' + key.name + '\nAddress: ' + key.address).addTo(mymap);
-                });})
+
+        const map = position.then((position) => {
+            const mymap = L.map('mapid').setView([position.coords.latitude, position.coords.longitude], 13);
+
+            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                maxZoom: 18,
+                id: 'mapbox.streets',
+                accessToken: '<%= map_token %>'
+            }).addTo(mymap);
+            return mymap;
+        });
+
+        const getResults = (position) => {
+            return new Promise((resolve, reject) => {
+                const reqListener = function() {
+                    resolve(JSON.parse(this.responseText));
+                };
+                var oReq = new XMLHttpRequest();
+                oReq.addEventListener("load", reqListener);
+                oReq.open("GET", "/api/v1?location[latitude]=" + position.coords.latitude + "&location[longitude]=" + position.coords.longitude);
+                oReq.send();
+            });
+        };
+
+        Promise.all([map, position.then(getResults)]).then(([mymap, data]) => {
+            data.map(key => {
+                L.marker([key.location.latitude, key.location.longitude]).bindPopup('Name: ' + key.name + '\nAddress: ' + key.address).addTo(mymap);
+            });
+        })
     </script>
 </body>
 
