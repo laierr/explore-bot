@@ -209,7 +209,8 @@ const getConfig = () => {
         "client_id": process.env.FOURSQUARE_CLIENT_ID,
         "client_secret": process.env.FOURSQUARE_SECRET
       },
-      "redis_url": process.env.REDIS_URL
+      "redis_url": process.env.REDIS_URL,
+      "map_token": process.env.MAP_TOKEN
     }
   }
 };
