@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Crude web interface</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.0-rc.3/dist/leaflet.js"></script>
+
+    <style>
+        #mapid {
+            height: 500px;
+            width: 500px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="mapid"></div>
+
+    <script>
+        const data = [{
+            "name": "Falafel Gabai (פלאפל גבאי)",
+            "location": {
+                "latitude": 32.076826,
+                "longitude": 34.769884
+            },
+            "openHours": "no info",
+            "phone": "+97236297060",
+            "category": "Falafel Restaurant",
+            "address": "Bograshov 25",
+            "distance": 4224
+        }, {
+            "name": "Xoho (זוהו)",
+            "location": {
+                "latitude": 32.08213781241923,
+                "longitude": 34.77168140494207
+            },
+            "openHours": "Closed until 7:30 AM Sunday",
+            "phone": "+972722495497",
+            "category": "Vegetarian / Vegan Restaurant",
+            "address": "17 Gordon St",
+            "distance": 4259
+        }, {
+            "name": "Manta Ray (מאנטה ריי)",
+            "location": {
+                "latitude": 32.06132165415454,
+                "longitude": 34.759790849817044
+            },
+            "openHours": "Open until Midnight",
+            "phone": "+97235174773",
+            "category": "Seafood Restaurant",
+            "address": "Alma Beach",
+            "distance": 4275
+        }];
+        const mymap = L.map('mapid').setView([32.0853, 34.7818], 13);
+
+        data.map(key => {
+            L.marker([key.location.latitude, key.location.longitude]).bindPopup('Name: ' + key.name + '\nAddress: ' + key.address).addTo(mymap);
+        });
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox.streets',
+            accessToken: '<%= map_token %>'
+        }).addTo(mymap);
+    </script>
+</body>
+
+</html>

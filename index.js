@@ -159,6 +159,10 @@ const processMessages = (bot, config, redis) => {
 };
 
 const webInterface = (config, redis, app) => {
+  const html = _.template(fs.readFileSync('html/index.html').toString());
+
+  app.get('/', (req, res) => { res.send(html(config)) });
+
   app.get('/api/v1', (req, res) => {
     const location = req.query.location || {latitude: 32.0878712, longitude: 34.7270341};
 
